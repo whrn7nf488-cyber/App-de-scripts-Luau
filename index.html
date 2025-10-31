@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aderlin | Dev</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!-- HEADER -->
+    <header class="header">
+      <button class="menu-btn" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h1>Aderlin</h1>
+    </header>
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar">
+      <a href="#home" onclick="closeMenu()"><i class="fas fa-home"></i> Inicio</a>
+      <a href="#sobre" onclick="closeMenu()"><i class="fas fa-user"></i> Sobre mí</a>
+      <a href="#proyectos" onclick="closeMenu()"><i class="fas fa-code"></i> Proyectos</a>
+      <a href="#recursos" onclick="closeMenu()"><i class="fas fa-book"></i> Recursos</a>
+      <a href="#contacto" onclick="closeMenu()"><i class="fas fa-envelope"></i> Contacto</a>
+    </nav>
+
+    <!-- OVERLAY -->
+    <div id="overlay" class="overlay" onclick="closeMenu()"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+      <!-- HOME -->
+      <section id="home" class="section active">
+        <div class="hero">
+          <img src="https://avatars.githubusercontent.com/u/197000000?v=4" alt="Aderlin" class="profile-pic">
+          <h2>¡Hola! Soy <span class="gradient-text">Aderlin</span></h2>
+          <p class="tagline">Desarrollador Móvil & Web</p>
+          <div class="social">
+            <a href="https://github.com/whrn7nf488-cyber" target="_blank"><i class="fab fa-github"></i></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOBRE MÍ -->
+      <section id="sobre" class="section">
+        <h2>Sobre mí</h2>
+        <p>Aprendo <strong>Python, HTML, CSS y JavaScript</strong>. Me apasiona crear apps modernas y funcionales desde mi celular.</p>
+      </section>
+
+      <!-- PROYECTOS -->
+      <section id="proyectos" class="section">
+        <h2>Proyectos</h2>
+        <div class="grid">
+          <div class="card">
+            <i class="fas fa-calculator"></i>
+            <h3>Calculadora Web</h3>
+            <p>Botones interactivos con diseño moderno</p>
+          </div>
+          <div class="card">
+            <i class="fas fa-gamepad"></i>
+            <h3>Juego de Adivinanza</h3>
+            <p>Número secreto 1-100 con pistas</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECURSOS (ADMIN PANEL + ANTI-SPEED) -->
+      <section id="recursos" class="section">
+        <h2>Mis Scripts</h2>
+        <div class="resource-list">
+
+          <!-- ADMIN PANEL COMPLETO -->
+          <div class="script-card">
+            <h4>Admin Panel Simple Completo</h4>
+            <p>Sistema de admin para Roblox con Fly, Noclip, Godmode, Speed y Kick. <strong>Solo para Aderrr564</strong>. Requiere <strong>2 scripts</strong>.</p>
+
+            <div class="multi-script">
+              <h5>Script 1: Client (LocalScript)</h5>
+              <p><strong>Ubicación:</strong> StarterPack → Tool → <code>AdminTool</code> → LocalScript (nómbralo <code>Client</code>)</p>
+              <pre><code id="admin-client">-- LocalScript dentro de AdminTool (Client)
+local tool = script.Parent
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Solo tú
+if player.Name ~= "Aderrr564" then return end
+
+local flying = false
+local noclip = false
+local godmode = false
+local speed = 16
+local bodyVelocity = nil
+local bodyGyro = nil
+
+-- === GUI ===
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AdminPanel"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local anchorX = 1
+local anchorY = 0
+local marginX = -20
+local marginY = 20
+local offset = 70
+
+local function createBtn(text, color, posX, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 60, 0, 60)
+    btn.Position = UDim2.new(anchorX, posX, anchorY, posY)
+    btn.AnchorPoint = Vector2.new(1, 0)
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 26
+    btn.Visible = false
+    btn.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = btn
+    return btn
+end
+
+local flyBtn    = createBtn("Fly",   Color3.fromRGB(0, 170, 255),    marginX,       marginY)
+local speedUp   = createBtn("+",     Color3.fromRGB(0, 255, 0),      marginX,       marginY + offset)
+local speedDown = createBtn("-",     Color3.fromRGB(255, 0, 0),      marginX,       marginY + offset*2)
+local noclipBtn = createBtn("Noclip",Color3.fromRGB(255, 165, 0),    marginX - offset, marginY + offset)
+local godBtn    = createBtn("God",   Color3.fromRGB(255, 215, 0),    marginX - offset*2, marginY + offset)
+local kickBtn   = createBtn("Kick",  Color3.fromRGB(200, 0, 0),      marginX - offset*3, marginY + offset)
+
+-- === FUNCIONES ===
+local function toggleFly()
+    flying = not flying
+    if flying then
+        humanoid.PlatformStand = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(50000, 50000, 50000)
+        bodyVelocity.Velocity = Vector3.new(0,0,0)
+        bodyVelocity.Parent = rootPart
+
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+        bodyGyro.CFrame = rootPart.CFrame
+        bodyGyro.Parent = rootPart
+    else
+        if bodyVelocity then bodyVelocity:Destroy() end
+        if bodyGyro then bodyGyro:Destroy() end
+        humanoid.PlatformStand = false
+    end
+end
+
+local function changeSpeed(delta)
+    speed = math.clamp(speed + delta, 16, 200)
+    humanoid.WalkSpeed = speed
+end
+
+local function toggleNoclip()
+    noclip = not noclip
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not noclip
+        end
+    end
+end
+
+local function toggleGodmode()
+    godmode = not godmode
+    humanoid.MaxHealth = godmode and math.huge or 100
+    humanoid.Health = godmode and math.huge or 100
+end
+
+local function showKickMenu()
+    local kickGui = Instance.new("ScreenGui")
+    kickGui.Parent = player.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 400)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.Parent = kickGui
+
+    local title = Instance.new("TextLabel")
+    title.Text = "KICK JUGADORES"
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    title.TextColor3 = Color3.new(1,1,1)
+    title.Font = Enum.Font.GothamBold
+    title.Parent = frame
+
+    local y = 60
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, -20, 0, 40)
+            btn.Position = UDim2.new(0, 10, 0, y)
+            btn.Text = p.Name
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            btn.TextColor3 = Color3.new(1,1,1)
+            btn.Parent = frame
+
+            btn.MouseButton1Click:Connect(function()
+                ReplicatedStorage.KickPlayer:FireServer(p)
+                kickGui:Destroy()
+            end)
+
+            y = y + 50
+        end
+    end
+end
+
+-- === CONECTAR ===
+flyBtn.MouseButton1Click:Connect(toggleFly)
+speedUp.MouseButton1Click:Connect(function() changeSpeed(10) end)
+speedDown.MouseButton1Click:Connect(function() changeSpeed(-10) end)
+noclipBtn.MouseButton1Click:Connect(toggleNoclip)
+godBtn.MouseButton1Click:Connect(toggleGodmode)
+kickBtn.MouseButton1Click:Connect(showKickMenu)
+
+-- === MOSTRAR PANEL ===
+local panelVisible = false
+tool.Activated:Connect(function()
+    panelVisible = not panelVisible
+    flyBtn.Visible = panelVisible
+    speedUp.Visible = panelVisible
+    speedDown.Visible = panelVisible
+    noclipBtn.Visible = panelVisible
+    godBtn.Visible = panelVisible
+    kickBtn.Visible = panelVisible
+end)
+
+-- === FLY CONTROL ===
+RunService.RenderStepped:Connect(function()
+    if not flying or not bodyVelocity then return end
+    local move = humanoid.MoveDirection
+    local cam = workspace.CurrentCamera
+    local look = cam.CFrame.LookVector
+    local right = cam.CFrame.RightVector
+
+    local target = (Vector3.new(look.X, 0, look.Z).Unit * -move.Z) + (Vector3.new(right.X, 0, right.Z).Unit * move.X)
+    target = target * 60
+
+    bodyVelocity.Velocity = Vector3.new(target.X, move.Y * 60, target.Z)
+    bodyGyro.CFrame = cam.CFrame
+end)
+
+player.CharacterRemoving:Connect(function()
+    if bodyVelocity then bodyVelocity:Destroy() end
+    if bodyGyro then bodyGyro:Destroy() end
+end)</code></pre>
+
+              <h5>Script 2: Server (Script)</h5>
+              <p><strong>Ubicación:</strong> ServerScriptService → Script (nómbralo <code>AdminSystem</code>)</p>
+              <pre><code id="admin-server">-- ServerScriptService > AdminSystem
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPack = game:GetService("StarterPack")
+
+local ADMIN_NAME = "Aderrr564"
+
+-- Crear RemoteEvent para kick
+local kickEvent = Instance.new("RemoteEvent")
+kickEvent.Name = "KickPlayer"
+kickEvent.Parent = ReplicatedStorage
+
+-- Dar tool al admin
+Players.PlayerAdded:Connect(function(player)
+    if player.Name == ADMIN_NAME then
+        player.CharacterAdded:Connect(function()
+            task.wait(1)
+            local backpack = player:WaitForChild("Backpack")
+            if not backpack:FindFirstChild("AdminTool") then
+                local tool = StarterPack:FindFirstChild("AdminTool")
+                if tool then
+                    tool:Clone().Parent = backpack
+                end
+            end
+        end)
+    end
+end)
+
+-- Kick
+kickEvent.OnServerEvent:Connect(function(player, target)
+    if player.Name == ADMIN_NAME and target:IsA("Player") then
+        target:Kick("Expulsado por el admin.")
+    end
+end)</code></pre>
+            </div>
+
+            <button onclick="copyBothScripts('admin-client', 'admin-server')" class="copy-btn">
+              <i class="fas fa-copy"></i> Copiar Ambos Scripts
+            </button>
+          </div>
+
+          <!-- ANTI-SPEED HACK -->
+          <div class="script-card">
+            <h4>AntiSpeedHacks (ServerScriptService)</h4>
+            <p>Detecta y bloquea speed hacks. Teletransporta y kickea tras 3 violaciones. Colócalo en <code>ServerScriptService</code>.</p>
+            <pre><code id="antispeed">-- Anti-Speed Hack Script
+-- Colócalo en ServerScriptService
+
+local Players = game:GetService("Players")
+local MAX_SPEED_MARGIN = 5  -- Margen de tolerancia (ajusta según tu juego)
+local KICK_THRESHOLD = 3    -- Número de violaciones antes de kickear
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+        
+        local lastPosition = rootPart.Position
+        local violationCount = 0
+        
+        -- Conecta al evento Running para detectar velocidad en tiempo real
+        humanoid.Running:Connect(function(speed)
+            if speed > humanoid.WalkSpeed + MAX_SPEED_MARGIN then
+                -- Velocidad sospechosa detectada
+                violationCount = violationCount + 1
+                
+                -- Teletransporta de vuelta para "corregir"
+                rootPart.CFrame = CFrame.new(lastPosition)
+                
+                -- Si hay muchas violaciones, kickea
+                if violationCount >= KICK_THRESHOLD then
+                    player:Kick("Detectado speed hack. ¡No hagas trampa!")
+                end
+            else
+                -- Actualiza posición si todo está normal
+                lastPosition = rootPart.Position
+                violationCount = math.max(0, violationCount - 1)  -- Reduce contador lentamente
+            end
+        end)
+        
+        -- Opcional: Verifica cambios en WalkSpeed
+        humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+            if humanoid.WalkSpeed > 50 then
+                player:Kick("WalkSpeed inválido detectado.")
+            end
+        end)
+    end)
+end)</code></pre>
+            <button onclick="copyScript('antispeed')" class="copy-btn">
+              <i class="fas fa-copy"></i> Copiar Script
+            </button>
+          </div>
+
+        </div>
+        <p class="add-hint">¿Otro script? Pásamelo → ¡lo agrego en 1 minuto!</p>
+      </section>
+
+      <!-- CONTACTO -->
+      <section id="contacto" class="section">
+        <h2>Contacto</h2>
+        <p><i class="fab fa-github"></i> GitHub: <a href="https://github.com/whrn7nf488-cyber">@whrn7nf488-cyber</a></p>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
